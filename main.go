@@ -1,0 +1,21 @@
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"log"
+	"network/util/verification"
+)
+
+func main() {
+	router := gin.Default()
+
+	if err := verification.Register(); err != nil {
+		log.Fatal("校验器注册失败:", err)
+	}
+
+	routerRegister(router)
+
+	if err := router.Run(":10086"); err != nil {
+		log.Fatal(err)
+	}
+}
