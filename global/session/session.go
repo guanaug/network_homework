@@ -50,3 +50,11 @@ func Logout(c *gin.Context) error {
 	delete(Session(c).Values, loginName)
 	return sessions.Save(c.Request, c.Writer)
 }
+
+func User(c *gin.Context) string {
+	if u, ok := Session(c).Values[loginName]; ok {
+		return u.(string)
+	}
+
+	return ""
+}

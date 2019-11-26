@@ -3,7 +3,7 @@ package verification
 import (
 	"github.com/gin-gonic/gin/binding"
 	"gopkg.in/go-playground/validator.v8"
-	"network/model/department"
+	"network/global/constant"
 	"reflect"
 	"regexp"
 )
@@ -43,7 +43,7 @@ func DepartmentTypeValidator(
 	field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string,
 ) bool {
 	if data, ok := field.Interface().(int); ok {
-		if data <= department.TypeAdministrator || data >= department.TypeMax {
+		if data <= constant.TypeUserAdministrator || data >= constant.TypeUserMax {
 			return false
 		}
 	}

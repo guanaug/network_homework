@@ -5,16 +5,6 @@ import (
 	"time"
 )
 
-const (
-	TypePlaceholder   = iota
-	TypeAdministrator // 1:管理员用户，系统只有一个，不能添加
-	TypeCity          // 2:市级单位
-	TypeDistrict      // 3:市级各辖区单位
-	TypeSupervised    // 4:受监管企业单位
-	TypeSupport       // 签约技术支持/安全服务单位
-	TypeMax
-)
-
 type Department struct {
 	tableName    struct{}  `sql:"network_homework.tb_department, discard_unknown_columns"`
 	ID           int64     `pg:"id, pk"`
@@ -27,6 +17,7 @@ type Department struct {
 	AdminContact string    `pg:"admin_contact, notnull"`
 	CreatedAt    time.Time `pg:"created_at, notnull"`
 	ModifiedAt   time.Time `pg:"modified_at, notnull"`
+	DeletedAt    time.Time `pg:"deleted_at,soft_delete"`
 }
 
 func New() *Department {

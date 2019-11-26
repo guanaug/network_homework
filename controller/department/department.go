@@ -70,7 +70,7 @@ func Delete(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func Modified(c *gin.Context) {
+func Modify(c *gin.Context) {
 	departmentInfo := Department{}
 
 	if err := c.BindJSON(&departmentInfo); err != nil {
@@ -80,6 +80,7 @@ func Modified(c *gin.Context) {
 	}
 
 	depart := &department.Department{
+		ID:           departmentInfo.ID,
 		Name:         departmentInfo.Name,
 		Address:      departmentInfo.Address,
 		Type:         departmentInfo.Type,
@@ -114,6 +115,7 @@ func List(c *gin.Context) {
 	if err != nil {
 		logger.Logger().Warn("query departments error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	departBriefInfos := struct {

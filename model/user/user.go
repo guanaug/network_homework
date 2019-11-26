@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"github.com/go-pg/pg/orm"
+	"network/global/constant"
 	"network/global/pgdb"
 	"time"
 )
@@ -20,7 +21,12 @@ type User struct {
 	Valid      bool      `pg:"valid, notnull"`
 	CreatedAt  time.Time `pg:"created_at, notnull"`
 	ModifiedAt time.Time `pg:"modified_at, notnull"`
+	DeletedAt  time.Time `pg:"deleted_at, soft_delete"`
 	Password   string    `pg:"password"`
+}
+
+func New() *User {
+	return &User{}
 }
 
 func (u *User) Model() *orm.Query {
@@ -29,7 +35,7 @@ func (u *User) Model() *orm.Query {
 
 func (u *User) Insert() error {
 	_, err := u.Model().Returning("*").Insert()
-	
+
 	return err
 }
 
@@ -52,11 +58,23 @@ func List(offset int, limit int) ([]User, int, error) {
 	return users, count, err
 }
 
-func (u *User)Login() (bool, error) {
+func (u *User) Login() (bool, error) {
 	err := u.Model().Where("account = ? and password = ?", u.Account, u.Password).Select()
 	if sql.ErrNoRows == err {
 		return false, nil
 	} else if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (u *User) IsAdmin() (bool, error) {
+	err := u.Model().Where("account = ? and type = ?", u.Account, constant.TypeUserAdministrator).Select()
+	if sql.ErrNoRows == err {
+		return false, nil
+	}
+	if err != nil {
 		return false, err
 	}
 
