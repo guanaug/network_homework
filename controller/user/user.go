@@ -6,6 +6,7 @@ import (
 	"network/global/logger"
 	"network/global/session"
 	"network/model/user"
+	"network/util/password"
 	"strconv"
 	"strings"
 	"time"
@@ -34,7 +35,7 @@ func Login(c *gin.Context) {
 		Password string `binding:"required"`
 	}{}
 
-	if err := c.BindQuery(&loginInfo); err != nil {
+	if err := c.BindJSON(&loginInfo); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "账号和密码不能为空！"})
 		return
 	}
@@ -46,7 +47,7 @@ func Login(c *gin.Context) {
 
 	u := &user.User{
 		Account:  strings.TrimSpace(loginInfo.Account),
-		Password: strings.TrimSpace(loginInfo.Password),
+		Password: password.New(strings.TrimSpace(loginInfo.Password)),
 	}
 
 	ok, err := u.Login()

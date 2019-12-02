@@ -7,7 +7,7 @@ import (
 	"network/middleware"
 )
 
-func routerRegister(router *gin.Engine)  {
+func routerRegister(router *gin.Engine) {
 	authorized := router.Group("/")
 	{
 		authorized.Use(middleware.Authorized)
@@ -25,7 +25,7 @@ func routerRegister(router *gin.Engine)  {
 			// 获取用户列表
 			groupUser.GET("/", user.List)
 			// 获取用户详细信息
-			groupUser.GET("/", user.Info)
+			groupUser.GET("/:id", user.Info)
 		}
 
 		groupDepartment := authorized.Group("/department")

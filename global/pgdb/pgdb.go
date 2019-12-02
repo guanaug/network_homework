@@ -8,14 +8,14 @@ import (
 
 var db *pg.DB
 
-func init()  {
+func init() {
 	once := sync.Once{}
 
 	once.Do(func() {
 		db = pg.Connect(&pg.Options{
-			User:                  "postgres",
-			Password:              "root",
-			Database:              "dogod",
+			User:     "postgres",
+			Password: "root",
+			Database: "dogod",
 			OnConnect: func(conn *pg.Conn) error {
 				return nil
 			},
@@ -43,4 +43,3 @@ func (q queryHook) BeforeQuery(event *pg.QueryEvent) {
 
 func (q queryHook) AfterQuery(event *pg.QueryEvent) {
 }
-

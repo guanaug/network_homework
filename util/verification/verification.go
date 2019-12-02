@@ -21,6 +21,8 @@ func Register() error {
 			}
 		}
 	}
+
+	return nil
 }
 
 func PhoneValidator(

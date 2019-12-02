@@ -6,16 +6,16 @@ import (
 	"sync"
 )
 
-const(
-	secretKey = "example-secret-key"
+const (
+	secretKey   = "example-secret-key"
 	sessionName = "network-homework"
 	loginName = "username"
 )
 
 var sess *sessions.Session
-var store * sessions.CookieStore
+var store *sessions.CookieStore
 
-func init()  {
+func init() {
 	once := sync.Once{}
 
 	once.Do(func() {
