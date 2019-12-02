@@ -11,8 +11,8 @@ func init() {
 	once := sync.Once{}
 
 	once.Do(func() {
-		logrus.SetLevel(logrus.DebugLevel)
 		l = logrus.New()
+		l.SetLevel(logrus.DebugLevel)
 	})
 }
 

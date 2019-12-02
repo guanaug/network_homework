@@ -37,7 +37,7 @@ func (d *Department) Delete() error {
 }
 
 func (d *Department) Update() error {
-	_, err := pgdb.DB().Model(d).WherePK().Update()
+	_, err := pgdb.DB().Model(d).WherePK().UpdateNotNull()
 
 	return err
 }

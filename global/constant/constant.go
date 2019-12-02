@@ -10,3 +10,13 @@ const (
 	TypeUserSupport       // 签约技术支持/安全服务单位
 	TypeUserMax
 )
+
+// 用户登录相关
+const (
+	KeyUserID = "user_id"
+)
+
+// 数据库相关
+const (
+	PageMaxItem = 200
+)

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"network/controller/department"
+	"network/controller/session"
 	"network/controller/user"
 	"network/middleware"
 )
@@ -11,8 +12,6 @@ func routerRegister(router *gin.Engine) {
 	authorized := router.Group("/")
 	{
 		authorized.Use(middleware.Authorized)
-		// 注销登录
-		authorized.DELETE("/user", user.Logout)
 
 		groupUser := authorized.Group("/user")
 		{
@@ -44,11 +43,14 @@ func routerRegister(router *gin.Engine) {
 				groupDepartment.GET("/:id", department.Info)
 			}
 		}
+
+		// 注销登录
+		authorized.DELETE("/session", session.Logout)
 	}
 
 	unauthorized := router.Group("/")
 	{
 		// 用户登录
-		unauthorized.POST("/login", user.Login)
+		unauthorized.POST("/session", middleware.UserLoginLog, session.Login)
 	}
 }

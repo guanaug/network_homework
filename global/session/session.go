@@ -20,6 +20,7 @@ func init() {
 
 	once.Do(func() {
 		store = sessions.NewCookieStore([]byte(secretKey))
+		store.MaxAge(24 * 60 * 60)
 	})
 }
 
@@ -51,7 +52,7 @@ func Logout(c *gin.Context) error {
 	return sessions.Save(c.Request, c.Writer)
 }
 
-func User(c *gin.Context) string {
+func GetUser(c *gin.Context) string {
 	if u, ok := Session(c).Values[loginName]; ok {
 		return u.(string)
 	}

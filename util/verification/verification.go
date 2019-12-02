@@ -29,7 +29,7 @@ func PhoneValidator(
 	v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value,
 	field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string,
 ) bool {
-	if data, ok := field.Interface().(string); ok {
+	if data, ok := field.Interface().(string); ok && len(data) > 0 {
 		str := `^1[3-9]\d{9}$`
 		reg := regexp.MustCompile(str)
 		if !reg.MatchString(data) {

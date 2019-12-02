@@ -2,7 +2,9 @@ package department
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg"
 	"net/http"
+	"network/global/constant"
 	"network/global/logger"
 	"network/model/department"
 	"strconv"
@@ -10,16 +12,17 @@ import (
 )
 
 type Department struct {
-	ID           int64     `json:"id, omitempty"`
-	Name         string    `json:"name, omitempty" binding:"required, max=64"`
-	Address      string    `json:"address, omitempty" binding:"required, max=128"`
-	Type         int8      `json:"type, omitempty" binding:"required, departmentType"`
-	Owner        string    `json:"owner, omitempty" binding:"required, max=16"`
-	OwnerContact string    `json:"owner_contact, omitempty" binding:"required, phone, len=11"`
-	Admin        string    `json:"admin, omitempty" binding:"required, max=16"`
-	AdminContact string    `json:"admin_contact, omitempty" binding:"required, phone, len=11"`
-	CreatedAt    time.Time `json:"created_at, omitempty"`
-	ModifiedAt   time.Time `json:"modified_at, omitempty"`
+	ID           int64     `json:"id,omitempty"`
+	Name         string    `json:"name,omitempty" binding:"required,max=64"`
+	Address      string    `json:"address,omitempty" binding:"required,max=128"`
+	Type         int8      `json:"type,omitempty" binding:"required,departmentType"`
+	Owner        string    `json:"owner,omitempty" binding:"required,max=16"`
+	OwnerContact string    `json:"owner_contact,omitempty" binding:"required,phone"`
+	Admin        string    `json:"admin,omitempty" binding:"required,max=16"`
+	AdminContact string    `json:"admin_contact,omitempty" binding:"required,phone"`
+	CreatedAt    time.Time `json:"created_at,omitempty"`
+	ModifiedAt   time.Time `json:"modified_at,omitempty"`
+	DeletedAt	 time.Time `json:"deleted_at,omitempty"`
 }
 
 func Add(c *gin.Context) {
@@ -70,8 +73,18 @@ func Delete(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// TODO modified_at时间还不能自动改
 func Modify(c *gin.Context) {
-	departmentInfo := Department{}
+	departmentInfo := struct {
+		ID           int64     `json:"id" binding:"required,gt=0"`
+		Name         string    `json:"name" binding:"max=64"`
+		Address      string    `json:"address" binding:"max=128"`
+		Type         int8      `json:"type" binding:"departmentType"`
+		Owner        string    `json:"owner" binding:"max=16"`
+		OwnerContact string    `json:"owner_contact" binding:"phone"`
+		Admin        string    `json:"admin" binding:"max=16"`
+		AdminContact string    `json:"admin_contact" binding:"phone"`
+	}{}
 
 	if err := c.BindJSON(&departmentInfo); err != nil {
 		logger.Logger().Debug(err)
@@ -81,13 +94,28 @@ func Modify(c *gin.Context) {
 
 	depart := &department.Department{
 		ID:           departmentInfo.ID,
-		Name:         departmentInfo.Name,
-		Address:      departmentInfo.Address,
-		Type:         departmentInfo.Type,
-		Owner:        departmentInfo.Owner,
-		OwnerContact: departmentInfo.OwnerContact,
-		Admin:        departmentInfo.Admin,
-		AdminContact: departmentInfo.AdminContact,
+	}
+	// TODO ugly code, must be reconstruct
+	if len(departmentInfo.Name) > 0 {
+		depart.Name = departmentInfo.Name
+	}
+	if len(departmentInfo.Address) > 0 {
+		depart.Address = departmentInfo.Address
+	}
+	if departmentInfo.Type > 0 {
+		depart.Type = departmentInfo.Type
+	}
+	if len(departmentInfo.Owner) > 0 {
+		depart.Owner = departmentInfo.Owner
+	}
+	if len(departmentInfo.OwnerContact) > 0 {
+		depart.OwnerContact = departmentInfo.OwnerContact
+	}
+	if len(departmentInfo.Admin) > 0 {
+		depart.Admin = departmentInfo.Admin
+	}
+	if len(departmentInfo.AdminContact) > 0 {
+		depart.AdminContact = departmentInfo.AdminContact
 	}
 
 	if err := depart.Update(); err != nil {
@@ -109,6 +137,10 @@ func List(c *gin.Context) {
 		logger.Logger().Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "分页参数有误！"})
 		return
+	}
+
+	if page.Limit > constant.PageMaxItem {
+		page.Limit = 200
 	}
 
 	departs, count, err := department.New().List(page.Offset, page.Limit)
@@ -154,6 +186,10 @@ func Info(c *gin.Context) {
 	}
 
 	*depart, err = depart.Info()
+	if pg.ErrNoRows == err {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error:": "未找到部门，请确认部门ID是否存在"})
+		return
+	}
 	if err != nil {
 		logger.Logger().Warn("获取部门信息失败:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
