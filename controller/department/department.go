@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg"
 	"net/http"
-	"network/global/constant"
 	"network/global/logger"
 	"network/model/department"
 	"strconv"
@@ -44,13 +43,13 @@ func Add(c *gin.Context) {
 		AdminContact: departmentInfo.AdminContact,
 	}
 
-	if err := depart.Add(); err != nil {
+	if err := depart.Insert(); err != nil {
 		logger.Logger().Warn("department add error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"id": depart.ID})
 }
 
 func Delete(c *gin.Context) {
@@ -129,8 +128,8 @@ func Modify(c *gin.Context) {
 
 func List(c *gin.Context) {
 	page := struct {
-		Offset int `json:"offset"`
-		Limit  int `json:"limit"`
+		Offset *int `form:"offset" binding:"exists,gte=0"`	// 这里不能用required，因为 offset=0的时候校验不能通过
+		Limit  int `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -139,11 +138,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	if page.Limit > constant.PageMaxItem {
-		page.Limit = 200
-	}
-
-	departs, count, err := department.New().List(page.Offset, page.Limit)
+	departs, count, err := department.New().List(*page.Offset, page.Limit)
 	if err != nil {
 		logger.Logger().Warn("query departments error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

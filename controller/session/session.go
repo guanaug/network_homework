@@ -21,6 +21,7 @@ func Login(c *gin.Context) {
 	}{}
 
 	if err := c.BindJSON(&loginInfo); err != nil {
+		logger.Logger().Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "账号和密码不能为空！"})
 		return
 	}

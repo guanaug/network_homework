@@ -1,22 +1,23 @@
 package department
 
 import (
+	"github.com/go-pg/pg/orm"
 	"network/global/pgdb"
 	"time"
 )
 
 type Department struct {
-	tableName    struct{}  `sql:"network_homework.tb_department, discard_unknown_columns"`
-	ID           int64     `pg:"id, pk"`
-	Name         string    `pg:"name, notnull"`
-	Address      string    `pg:"address, notnull"`
-	Type         int8      `pg:"type, notnull"`
-	Owner        string    `pg:"owner, notnull"`
-	OwnerContact string    `pg:"owner_contact, notnull"`
-	Admin        string    `pg:"admin, notnull"`
-	AdminContact string    `pg:"admin_contact, notnull"`
-	CreatedAt    time.Time `pg:"created_at, notnull"`
-	ModifiedAt   time.Time `pg:"modified_at, notnull"`
+	tableName    struct{}  `sql:"network_homework.tb_department,discard_unknown_columns"`
+	ID           int64     `pg:"id,pk"`
+	Name         string    `pg:"name,notnull"`
+	Address      string    `pg:"address,notnull"`
+	Type         int8      `pg:"type,notnull"`
+	Owner        string    `pg:"owner,notnull"`
+	OwnerContact string    `pg:"owner_contact,notnull"`
+	Admin        string    `pg:"admin,notnull"`
+	AdminContact string    `pg:"admin_contact,notnull"`
+	CreatedAt    time.Time `pg:"created_at,notnull"`
+	ModifiedAt   time.Time `pg:"modified_at,notnull"`
 	DeletedAt    time.Time `pg:"deleted_at,soft_delete"`
 }
 
@@ -24,8 +25,12 @@ func New() *Department {
 	return &Department{}
 }
 
-func (d *Department) Add() error {
-	_, err := pgdb.DB().Model(d).Returning("*").Insert()
+func (d *Department) Model() *orm.Query {
+	return pgdb.DB().Model(d)
+}
+
+func (d *Department) Insert() error {
+	_, err := d.Model().Returning("*").Insert()
 
 	return err
 }

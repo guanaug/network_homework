@@ -8,21 +8,22 @@ import (
 	"time"
 )
 
+// TODO 这里 pg tag貌似不生效，得用sql tag才行，但是，用sql tag time不会用默认值
 type User struct {
-	tableName  struct{}  `sql:"network_homework.tb_user"`
-	ID         int64     `sql:"id, pk"`
-	Account    string    `sql:"account, notnull"`
-	Name       string    `sql:"name, notnull"`
-	Type       int8      `sql:"type, notnull"` // 1:市级单位 2:市级各辖区单位 3:受监管企业单位 4:签约技术支持/安全服务单位
-	Phone      string    `sql:"phone" binding:"phone"`
-	Email      string    `sql:"email" binding:"email"`
+	tableName  struct{}  `sql:"network_homework.tb_user,discard_unknown_columns"`
+	ID         int64     `pg:"id,pk"`
+	Account    string    `pg:"account,notnull"`
+	Name       string    `sql:"name,notnull"`
+	Type       int8      `pg:"type,notnull"` // 1:市级单位 2:市级各辖区单位 3:受监管企业单位 4:签约技术支持/安全服务单位
+	Phone      string    `pg:"phone" binding:"phone"`
+	Email      string    `pg:"email" binding:"email"`
 	WeChat     string    `sql:"wechat"`
-	Department int64     `sql:"department"`
-	Valid      bool      `sql:"valid, notnull"`
-	CreatedAt  time.Time `sql:"created_at, notnull"`
-	ModifiedAt time.Time `sql:"modified_at, notnull"`
-	DeletedAt  time.Time `sql:"deleted_at, soft_delete"`
-	Password   string    `sql:"password"`
+	Department int64     `pg:"department"`
+	Valid      bool      `pg:"valid,notnull"`
+	CreatedAt  time.Time `pg:"created_at,notnull"`
+	ModifiedAt time.Time `pg:"modified_at,notnull"`
+	DeletedAt  time.Time `pg:"deleted_at,soft_delete"`
+	Password   string    `pg:"password"`
 }
 
 func New() *User {

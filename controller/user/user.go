@@ -5,25 +5,27 @@ import (
 	"net/http"
 	"network/global/logger"
 	"network/model/user"
+	"network/util/password"
 	"strconv"
 	"time"
 )
 
 // TODO tag检验
 type User struct {
-	ID         int64     `json:"id, omitempty"`
-	Account    string    `json:"account, omitempty" binding:"required"`
-	Name       string    `json:"name, notnull"`
-	Type       int8      `json:"type, notnull"` // 1: 管理员 2:市级单位 3:市级各辖区单位 4:受监管企业单位 5:签约技术支持/安全服务单位
-	Phone      string    `json:"phone" binding:"phone"`
-	Email      string    `json:"email" binding:"email"`
-	WeChat     string    `json:"wechat"`
-	Department int64     `json:"department"`
-	Valid      bool      `json:"valid, notnull"`
-	CreatedAt  time.Time `json:"created_at, notnull"`
-	ModifiedAt time.Time `json:"modified_at, notnull"`
-	DeletedAt  time.Time `json:"deleted_at"`
-	Password   string    `json:"password"`
+	ID         int64     `json:"id,omitempty"`
+	Account    string    `json:"account,omitempty" binding:"required"`
+	Name       string    `json:"name,omitempty"`
+	// 这个Type暂时想不到有什么作用，先不用
+	//Type       int8      `json:"type, notnull"` // 1: 管理员 2:市级单位 3:市级各辖区单位 4:受监管企业单位 5:签约技术支持/安全服务单位
+	Phone      string    `json:"phone,omitempty"`
+	Email      string    `json:"email,omitempty"`
+	WeChat     string    `json:"wechat,omitempty"`
+	Department int64     `json:"department,omitempty"`
+	Valid      bool      `json:"valid,omitempty"`
+	CreatedAt  time.Time `json:"created_at,omitempty"`
+	ModifiedAt time.Time `json:"modified_at,omitempty"`
+	DeletedAt  time.Time `json:"deleted_at,omitempty"`
+	Password   string    `json:"password,omitempty"`
 }
 
 func Add(c *gin.Context) {
@@ -38,13 +40,14 @@ func Add(c *gin.Context) {
 	model := &user.User{
 		Account:    u.Account,
 		Name:       u.Name,
-		Type:       u.Type,
+		//Type:       u.Type,
+		Type:		-1,
 		Phone:      u.Phone,
 		Email:      u.Email,
 		WeChat:     u.WeChat,
 		Department: u.Department,
 		Valid:      true,
-		Password:   u.Password,
+		Password:   password.New(u.Password),
 	}
 
 	if err := model.Insert(); err != nil {
@@ -53,7 +56,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"id": model.ID})
 }
 
 func Delete(c *gin.Context) {
@@ -89,7 +92,7 @@ func Modify(c *gin.Context) {
 		ID:         u.ID,
 		Account:    u.Account,
 		Name:       u.Name,
-		Type:       u.Type,
+		//Type:       u.Type,
 		Phone:      u.Phone,
 		Email:      u.Email,
 		WeChat:     u.Email,
@@ -109,8 +112,8 @@ func Modify(c *gin.Context) {
 
 func List(c *gin.Context) {
 	page := struct {
-		Offset int `json:"offset" binding:"required,gt=0"`
-		Limit  int `json:"limit" binding:"required,max=200"`
+		Offset *int `form:"offset" binding:"exists,gte=0"`	// 这里不能用required，因为 offset=0的时候校验不能通过
+		Limit  int `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -119,7 +122,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	users, count, err := user.List(page.Offset, page.Limit)
+	users, count, err := user.List(*page.Offset, page.Limit)
 	if err != nil {
 		logger.Logger().Warn("query users error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -136,7 +139,7 @@ func List(c *gin.Context) {
 			ID:         u.ID,
 			Account:    u.Account,
 			Name:       u.Name,
-			Type:       u.Type,
+			//Type:       u.Type,
 			Phone:      u.Phone,
 			Email:      u.Email,
 			WeChat:     u.WeChat,

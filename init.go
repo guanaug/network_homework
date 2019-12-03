@@ -9,6 +9,8 @@ import (
 )
 
 func routerRegister(router *gin.Engine) {
+	router.Use(middleware.AllowCORS)
+
 	authorized := router.Group("/")
 	{
 		authorized.Use(middleware.Authorized)
@@ -16,13 +18,13 @@ func routerRegister(router *gin.Engine) {
 		groupUser := authorized.Group("/user")
 		{
 			// 添加用户
-			groupUser.POST("/", user.Add)
+			groupUser.POST("", user.Add)
 			// 删除用户
 			groupUser.DELETE("/:id", user.Delete)
 			// 修改用户
-			groupUser.PUT("/", user.Modify)
+			groupUser.PUT("", user.Modify)
 			// 获取用户列表
-			groupUser.GET("/", user.List)
+			groupUser.GET("", user.List)
 			// 获取用户详细信息
 			groupUser.GET("/:id", user.Info)
 		}
@@ -32,13 +34,13 @@ func routerRegister(router *gin.Engine) {
 			{
 				groupDepartment.Use(middleware.AdminAuthorized)
 				// 添加部门
-				groupDepartment.POST("/", department.Add)
+				groupDepartment.POST("", department.Add)
 				// 修改部门
-				groupDepartment.PUT("/", department.Modify)
+				groupDepartment.PUT("", department.Modify)
 				// 删除部门
 				groupDepartment.DELETE("/:id", department.Delete)
 				// 获取部门列表
-				groupDepartment.GET("/", department.List)
+				groupDepartment.GET("", department.List)
 				// 获取部门详细信息
 				groupDepartment.GET("/:id", department.Info)
 			}
