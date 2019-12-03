@@ -12,6 +12,8 @@ import (
 )
 
 // TODO 可以考虑添加验证码
+// Account校验
+// 密码校验
 func Login(c *gin.Context) {
 	loginInfo := struct {
 		Account  string `binding:"required"`
@@ -40,7 +42,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "账号或密码错误！"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "账号或密码错误！"})
 		return
 	}
 
@@ -54,7 +56,6 @@ func Login(c *gin.Context) {
 		ID   int64  `json:"id"`
 		Name string `json:"name"`
 	}{ID: u.ID, Name: u.Name}
-
 
 	// 记录用户ID，方便日志拦截器使用
 	c.Set(constant.KeyUserID, u.ID)
