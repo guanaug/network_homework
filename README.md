@@ -1,6 +1,6 @@
 # 高级计算机网络结课大作业
 * version: v1.0.0 
-* author: 官嘉林
+* author: dogod
 * created_at: 2019.12.02 
 
 ## 接口定义
@@ -75,6 +75,8 @@
         * 错误:
             * 400: 分页参数有误
             * 500: 服务器内部错误
+            
+***
 
 * 部门相关
      > POST `/department`
@@ -163,3 +165,34 @@
          * 错误:
              * 400: 分页参数有误
              * 500: 服务器内部错误
+             
+***
+
+* 会话相关
+    > POST `/session`
+    * 作用：用户登录
+    * 参数：
+        * `application/json`
+        * account: string(required)，用户账号，规则同`POST /user`
+        * password: string(required)，用户密码，规则同`POST /user`
+    * 返回:
+        * 200：
+            * `application`
+            * id: string(required)，用户ID，规则同`POST /user`
+            * name: string(required)，用户名称
+        * 错误：
+            * 400: 请输入正确的账号或密码
+            * 401: 账号或密码错误
+            * 500: 服务器内部错误
+        
+    > DELETE `/session/:id`
+    * 作用：注销登录
+    * 参数：
+        * 无
+    * 返回:
+        * 200：
+            * `application`
+            * id: string(required)，用户ID
+            * name: string(required)，用户名称
+        * 错误：
+            * 500: 服务器内部错误
