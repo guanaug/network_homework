@@ -47,14 +47,16 @@ func (u *User) Delete() error {
 }
 
 func (u *User) Update() error {
-	_, err := u.Model().WherePK().Update()
+	_, err := u.Model().WherePK().UpdateNotNull()
 
 	return err
 }
 
 func List(offset int, limit int) ([]User, int, error) {
 	users := make([]User, 0)
-	count, err := pgdb.DB().Model(&users).Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
+	count, err := pgdb.DB().Model(&users).
+		Where("type != ?", constant.TypeUserAdministrator).
+		Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
 
 	return users, count, err
 }
@@ -80,4 +82,31 @@ func (u *User) IsAdmin() (bool, error) {
 	}
 
 	return true, nil
+}
+
+// TODO 如果ID数量过大可能会有问题
+func MapID2User(id ...int64) (map[int64]User, error) {
+	users := make([]User, 0)
+	mapID2User := make(map[int64]User)
+
+	query := pgdb.DB().Model(&users)
+	if len(id) > 0 {
+		query.Where("id in ?", pg.Array(id))
+	}
+	err := query.Select()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range users {
+		mapID2User[user.ID] = user
+	}
+
+	return mapID2User, nil
+}
+
+func OneByAccount(account string) (User, error) {
+	u := User{}
+	err := pgdb.DB().Model(&u).Where("account = ?", account).Select()
+	return u, err
 }

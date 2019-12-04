@@ -6,9 +6,11 @@ import (
 	"network/global/constant"
 	"network/global/logger"
 	"network/global/session"
+	"network/model/loginlog"
 	"network/model/user"
 	"network/util/password"
 	"strings"
+	"time"
 )
 
 // TODO 可以考虑添加验证码
@@ -72,4 +74,49 @@ func Logout(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func LoginLog(c *gin.Context) {
+	page := struct {
+		Offset *int `form:"offset" binding:"exists,gte=0"` // 这里不能用required，因为 offset=0的时候校验不能通过
+		Limit  int  `form:"limit" binding:"required,max=200"`
+	}{}
+
+	if err := c.BindQuery(&page); err != nil {
+		logger.Logger().Debug(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "分页参数有误！"})
+		return
+	}
+
+	logs, count, err := loginlog.List(*page.Offset, page.Limit)
+	if err != nil {
+		logger.Logger().Warn("query login log error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	type logInfo struct {
+		ID          int64     `json:"id"`
+		UserAccount string    `json:"user_account"`
+		UserName    string    `json:"user_name"`
+		IP          string    `json:"ip"`
+		CreatedAt   time.Time `json:"created"`
+	}
+
+	logInfos := struct {
+		Count int       `json:"count"`
+		Logs  []logInfo `json:"logs"`
+	}{}
+	logInfos.Count = count
+
+	for _, l := range logs {
+		logInfos.Logs = append(logInfos.Logs, logInfo{
+			ID:          l.ID,
+			UserAccount: l.UserAccount,
+			UserName:    l.UserName,
+			IP:          l.IP,
+			CreatedAt:   l.CreatedAt,
+		})
+	}
+	c.JSON(http.StatusOK, logInfos)
 }

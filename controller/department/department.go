@@ -21,7 +21,7 @@ type Department struct {
 	AdminContact string    `json:"admin_contact,omitempty" binding:"required,phone"`
 	CreatedAt    time.Time `json:"created_at,omitempty"`
 	ModifiedAt   time.Time `json:"modified_at,omitempty"`
-	DeletedAt	 time.Time `json:"deleted_at,omitempty"`
+	DeletedAt    time.Time `json:"deleted_at,omitempty"`
 }
 
 func Add(c *gin.Context) {
@@ -75,14 +75,14 @@ func Delete(c *gin.Context) {
 // TODO modified_at时间还不能自动改
 func Modify(c *gin.Context) {
 	departmentInfo := struct {
-		ID           int64     `json:"id" binding:"required,gt=0"`
-		Name         string    `json:"name" binding:"max=64"`
-		Address      string    `json:"address" binding:"max=128"`
-		Type         int8      `json:"type" binding:"departmentType"`
-		Owner        string    `json:"owner" binding:"max=16"`
-		OwnerContact string    `json:"owner_contact" binding:"phone"`
-		Admin        string    `json:"admin" binding:"max=16"`
-		AdminContact string    `json:"admin_contact" binding:"phone"`
+		ID           int64  `json:"id" binding:"required,gt=0"`
+		Name         string `json:"name" binding:"max=64"`
+		Address      string `json:"address" binding:"max=128"`
+		Type         int8   `json:"type" binding:"departmentType"`
+		Owner        string `json:"owner" binding:"max=16"`
+		OwnerContact string `json:"owner_contact" binding:"phone"`
+		Admin        string `json:"admin" binding:"max=16"`
+		AdminContact string `json:"admin_contact" binding:"phone"`
 	}{}
 
 	if err := c.BindJSON(&departmentInfo); err != nil {
@@ -92,7 +92,7 @@ func Modify(c *gin.Context) {
 	}
 
 	depart := &department.Department{
-		ID:           departmentInfo.ID,
+		ID: departmentInfo.ID,
 	}
 	// TODO ugly code, must be reconstruct
 	if len(departmentInfo.Name) > 0 {
@@ -128,8 +128,8 @@ func Modify(c *gin.Context) {
 
 func List(c *gin.Context) {
 	page := struct {
-		Offset *int `form:"offset" binding:"exists,gte=0"`	// 这里不能用required，因为 offset=0的时候校验不能通过
-		Limit  int `form:"limit" binding:"required,max=200"`
+		Offset *int `form:"offset" binding:"exists,gte=0"` // 这里不能用required，因为 offset=0的时候校验不能通过
+		Limit  int  `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -138,7 +138,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	departs, count, err := department.New().List(*page.Offset, page.Limit)
+	departs, count, err := department.List(*page.Offset, page.Limit)
 	if err != nil {
 		logger.Logger().Warn("query departments error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

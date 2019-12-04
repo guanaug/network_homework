@@ -1,6 +1,7 @@
 package department
 
 import (
+	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"network/global/pgdb"
 	"time"
@@ -47,10 +48,10 @@ func (d *Department) Update() error {
 	return err
 }
 
-func (d *Department) List(offset int, limit int) ([]Department, int, error) {
+func List(offset int, limit int) ([]Department, int, error) {
 	departs := make([]Department, 0)
 
-	count, err := pgdb.DB().Model(d).Offset(offset).Limit(limit).Order("id asc").SelectAndCount(&departs)
+	count, err := pgdb.DB().Model(&departs).Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
 
 	return departs, count, err
 }
@@ -61,4 +62,41 @@ func (d *Department) Info() (Department, error) {
 	err := pgdb.DB().Model(d).WherePK().Select(&depart)
 
 	return depart, err
+}
+
+// TODO 如果ID数量过大可能会有问题
+func MapID2Department(id ...int64) (map[int64]Department, error) {
+	departs := make([]Department, 0)
+	mapID2Department := make(map[int64]Department)
+
+	query := pgdb.DB().Model(&departs)
+	if len(id) > 0 {
+		query.Where("id in ?", pg.Array(id))
+	}
+	err := query.Select()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, depart := range departs {
+		mapID2Department[depart.ID] = depart
+	}
+
+	return mapID2Department, nil
+}
+
+func (d *Department) IsRoleOr(role ...int8) (bool, error)  {
+	if len(role) == 0 {
+		return false, nil
+	}
+
+	count, err := d.Model().Where("type IN (?)", pg.In(role)).WherePK().Count()
+	if err != nil {
+		return false, err
+	}
+	if 0 == count {
+		return false, nil
+	}
+
+	return true, nil
 }

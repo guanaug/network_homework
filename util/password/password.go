@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	salt = "*CFVdkgomy#OAhDmfp4%jlzDj%8zCqOo"
-	iter = 32
+	salt   = "*CFVdkgomy#OAhDmfp4%jlzDj%8zCqOo"
+	iter   = 32
 	kenLen = 128
 )
 

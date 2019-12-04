@@ -9,7 +9,7 @@ import (
 const (
 	secretKey   = "example-secret-key"
 	sessionName = "network-homework"
-	loginName = "username"
+	loginName   = "username"
 )
 
 var sess *sessions.Session

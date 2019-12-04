@@ -4,19 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"network/controller/department"
 	"network/controller/session"
+	"network/controller/transaction"
 	"network/controller/user"
 	"network/middleware"
 )
 
 func routerRegister(router *gin.Engine) {
-	router.Use(middleware.AllowCORS)
-
 	authorized := router.Group("/")
 	{
 		authorized.Use(middleware.Authorized)
 
 		groupUser := authorized.Group("/user")
 		{
+			groupUser.Use(middleware.AdminAuthorized)
 			// 添加用户
 			groupUser.POST("", user.Add)
 			// 删除用户
@@ -46,8 +46,25 @@ func routerRegister(router *gin.Engine) {
 			}
 		}
 
+		groupTransaction := authorized.Group("/transaction")
+		{
+			{
+				groupTransaction.Use(middleware.CityAndDistrictAuthorized)
+				// 添加事件
+				groupTransaction.POST("", transaction.Add)
+				// 修改事件
+				groupTransaction.PUT("", transaction.Modified)
+				// 获取事件信息
+				groupTransaction.GET("", transaction.List)
+				// 事件统计
+				groupTransaction.GET("/statistic", transaction.Statistic)
+			}
+		}
+
 		// 注销登录
 		authorized.DELETE("/session", session.Logout)
+		//查看登录日志
+		authorized.GET("/session/log", middleware.AdminAuthorized, session.LoginLog)
 	}
 
 	unauthorized := router.Group("/")
