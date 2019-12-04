@@ -93,7 +93,7 @@ func Modify(c *gin.Context) {
 		Email      string `json:"email,omitempty"`
 		WeChat     string `json:"wechat,omitempty"`
 		Department int64  `json:"department,omitempty"`
-		Valid      *bool   `json:"valid,omitempty"`
+		Valid      *bool  `json:"valid,omitempty"`
 		Password   string `json:"password,omitempty"`
 	}{}
 
@@ -104,7 +104,7 @@ func Modify(c *gin.Context) {
 	}
 
 	model := &user.User{
-		ID:      u.ID,
+		ID: u.ID,
 	}
 	// TODO ugly code
 	if len(u.Name) > 0 {
@@ -140,8 +140,8 @@ func Modify(c *gin.Context) {
 
 func List(c *gin.Context) {
 	page := struct {
-		Offset *int `form:"offset" binding:"exists,gte=0"` // 这里不能用required，因为 offset=0的时候校验不能通过
-		Limit  int  `form:"limit" binding:"required,max=200"`
+		Page  int `form:"page" binding:"required,gt=0"`
+		Limit int `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -157,7 +157,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	users, count, err := user.List(*page.Offset, page.Limit)
+	users, count, err := user.List((page.Page-1)*page.Limit, page.Limit)
 	if err != nil {
 		logger.Logger().Warn("query users error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

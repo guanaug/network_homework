@@ -104,7 +104,7 @@ func List(c *gin.Context) {
 		TranType          int8      `form:"tran_type,omitempty"`
 		HandlerDepartment int64     `form:"handler_department,omitempty"`
 		Handler           int64     `form:"handler,omitempty"`
-		Offset            int       `form:"offset,omitempty"`
+		Page              int       `form:"page,omitempty"`
 		Limit             int       `form:"limit,omitempty"`
 	}{}
 
@@ -157,7 +157,7 @@ func List(c *gin.Context) {
 	if !trans.Begin.IsZero() && !trans.End.IsZero() {
 		model.Where("created_at >= ? and created_at <= ?", trans.Begin, trans.End)
 	}
-	count, err := model.Offset(trans.Offset).Limit(trans.Limit).Order("id asc").SelectAndCount()
+	count, err := model.Offset((trans.Page - 1) * trans.Limit).Limit(trans.Limit).Order("id asc").SelectAndCount()
 	if err != nil {
 		logger.Logger().Warn("query transaction error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -204,9 +204,9 @@ func List(c *gin.Context) {
 func Statistic(c *gin.Context) {
 	var stat []struct {
 		Status int8 `sql:"status" json:"status"`
-		Count  int `json:"count"`
+		Count  int  `json:"count"`
 	}
-	
+
 	err := transaciton.New().Model().Column("transaction.status").
 		ColumnExpr("count(*)").
 		Group("transaction.status").Select(&stat)

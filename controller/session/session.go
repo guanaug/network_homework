@@ -78,8 +78,8 @@ func Logout(c *gin.Context) {
 
 func LoginLog(c *gin.Context) {
 	page := struct {
-		Offset *int `form:"offset" binding:"exists,gte=0"` // 这里不能用required，因为 offset=0的时候校验不能通过
-		Limit  int  `form:"limit" binding:"required,max=200"`
+		Page  int `form:"page" binding:"required,gt=0"`
+		Limit int `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -88,7 +88,7 @@ func LoginLog(c *gin.Context) {
 		return
 	}
 
-	logs, count, err := loginlog.List(*page.Offset, page.Limit)
+	logs, count, err := loginlog.List((page.Page-1)*page.Limit, page.Limit)
 	if err != nil {
 		logger.Logger().Warn("query login log error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
