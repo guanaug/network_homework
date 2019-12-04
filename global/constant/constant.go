@@ -50,7 +50,7 @@ const (
 	StatusEventFinished
 )
 
-// 事务类型
+// 事务类型：1:安全事件通报、2:热点事件发布
 const (
 	TypeTransPlaceholder = iota
 	TypeTransReport
