@@ -63,7 +63,7 @@
     > GET `/user`
     * 作用: 获取用户列表
     * 参数:
-        * offset: int(required)，分页起始值
+        * page: int(required)，第几页
         * limit: int(required)，每页数量，1-200
     * 返回:
         * 200
@@ -145,7 +145,7 @@
      > GET `/department`
      * 作用: 获取部门列表
      * 参数:
-        * offset: int(required)，分页起始值
+        * page: int(required)，第几页
         * limit: int(required)，每页数量，1-200
      * 返回:
          * 200
@@ -225,7 +225,7 @@
     > GET `/session/log`
     * 作用: 获取用户登录日志
     * 参数:
-        * offset: int(required)，分页起始值
+        * page: int(required)，第几页
         * limit: int(required)，每页数量，1-200
     * 返回:
         * 200:
@@ -284,7 +284,7 @@
         * tran_type: int8(optional)，根据事务类型查询事务
         * handler_department：int64(optional)，根据辖区查询事务
         * handler: int64(optional)，根据事件处理用户查询事务
-        * offset: int(required)，分页开始条目
+        * page: int(required)，第几页
         * limit: int(required)，分页每页大小
     * 返回:
         * 200

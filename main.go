@@ -15,6 +15,9 @@ func main() {
 
 	routerRegister(router)
 
+	// 临时解决跨域问题
+	router.Static("/static", "../www")
+
 	if err := router.Run(":10086"); err != nil {
 		log.Fatal(err)
 	}
