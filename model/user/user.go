@@ -47,8 +47,14 @@ func (u *User) Delete() error {
 }
 
 func (u *User) Update() error {
-	_, err := u.Model().WherePK().UpdateNotNull()
+	_, err := u.Model().WherePK().Returning("*").UpdateNotNull()
 
+	return err
+}
+
+// TODO ugly code
+func (u *User) Restore() error {
+	_, err := u.Model().ExecOne("UPDATE network_homework.tb_user SET deleted_at = NULL")
 	return err
 }
 
@@ -108,5 +114,11 @@ func MapID2User(id ...int64) (map[int64]User, error) {
 func OneByAccount(account string) (User, error) {
 	u := User{}
 	err := pgdb.DB().Model(&u).Where("account = ?", account).Select()
+	return u, err
+}
+
+func OneWithDeletedByAccount(account string) (User, error) {
+	u := User{}
+	_, err := pgdb.DB().QueryOne(&u, "SELECT * FROM network_homework.tb_user where account = ?", account)
 	return u, err
 }

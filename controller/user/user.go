@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg"
 	"net/http"
 	"network/global/logger"
 	"network/model/department"
@@ -31,13 +32,19 @@ type User struct {
 	Password       string    `json:"password,omitempty"`
 }
 
-// TODO 删除用户再添加用户有问题，因为用户只是软删除
 func Add(c *gin.Context) {
 	u := User{}
 
 	if err := c.BindJSON(&u); err != nil {
 		logger.Logger().Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "用户信息填写有误！"})
+		return
+	}
+
+	existUser, err := user.OneWithDeletedByAccount(u.Account)
+	if err != nil && err != pg.ErrNoRows {
+		logger.Logger().Warn("query user by account error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -54,8 +61,17 @@ func Add(c *gin.Context) {
 		Password:   password.New(u.Password),
 	}
 
-	if err := model.Insert(); err != nil {
-		logger.Logger().Warn("insert user error:", err)
+	if existUser.DeletedAt.IsZero() {
+		// 之前没有软删除过，直接插入
+		err = model.Insert()
+	} else {
+		// 软删除过，则直接更新
+		model.ID = existUser.ID
+		err = model.Restore()
+		err = model.Update()
+	}
+	if err != nil {
+		logger.Logger().Warn("insert or user error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
