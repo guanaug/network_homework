@@ -201,6 +201,7 @@
             * `application/json`
             * id: int64(required)，用户ID，规则同`POST /user`
             * name: string(required)，用户名称
+            * type: int8(required)，用户类型 1:管理员，-1:其他
         * 错误：
             * 400: 请输入正确的账号或密码
                 * `application/json`
