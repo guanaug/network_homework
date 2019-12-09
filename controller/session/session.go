@@ -58,8 +58,8 @@ func Login(c *gin.Context) {
 	userBriefInfo := struct {
 		ID   int64  `json:"id"`
 		Name string `json:"name"`
-		Type int8	`json:"type,omitempty"`
-	}{ID: u.ID, Name: u.Name, Type:u.Type}
+		Type int8   `json:"type,omitempty"`
+	}{ID: u.ID, Name: u.Name, Type: u.Type}
 
 	// 记录用户ID，方便日志拦截器使用
 	c.Set(constant.KeyUserID, u.ID)

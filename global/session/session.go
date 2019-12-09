@@ -44,12 +44,15 @@ func IsLogin(c *gin.Context) bool {
 
 func Login(c *gin.Context, value string) error {
 	Session(c).Values[loginName] = value
-	return sessions.Save(c.Request, c.Writer)
+	return Session(c).Save(c.Request, c.Writer)
 }
 
 func Logout(c *gin.Context) error {
 	delete(Session(c).Values, loginName)
-	return sessions.Save(c.Request, c.Writer)
+	Session(c).Options = &sessions.Options{
+		MaxAge:   -1,
+	}
+	return Session(c).Save(c.Request, c.Writer)
 }
 
 func GetUser(c *gin.Context) string {
