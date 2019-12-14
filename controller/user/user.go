@@ -166,6 +166,12 @@ func List(c *gin.Context) {
 		return
 	}
 
+	types := make([]int8, 0)
+	for _, v := range c.QueryArray("type") {
+		t, _ := strconv.Atoi(v)
+		types = append(types, int8(t))
+	}
+
 	mapID2Department, err := department.MapID2Department()
 	if err != nil {
 		logger.Logger().Warn("获取部门ID到部门名字的映射失败:", err)
@@ -173,7 +179,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	users, count, err := user.List((page.Page-1)*page.Limit, page.Limit)
+	users, count, err := user.List((page.Page-1)*page.Limit, page.Limit, types...)
 	if err != nil {
 		logger.Logger().Warn("query users error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -208,4 +214,38 @@ func List(c *gin.Context) {
 
 func Info(c *gin.Context) {
 
+}
+
+func ListWithType(c *gin.Context) {
+	page := struct {
+		Type []int8 `json:"type"`
+	}{}
+
+	if err := c.BindJSON(&page); err != nil {
+		logger.Logger().Debug(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "分页参数有误！"})
+		return
+	}
+
+	users, _, err := user.List(0, 0, page.Type...)
+	if err != nil {
+		logger.Logger().Warn("query users error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	type ub struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+	ubs := make([]ub, 0)
+
+	for _, u := range users {
+		ubs = append(ubs, ub{
+			ID:   u.ID,
+			Name: u.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, &ubs)
 }

@@ -16,17 +16,20 @@ func routerRegister(router *gin.Engine) {
 
 		groupUser := authorized.Group("/user")
 		{
-			groupUser.Use(middleware.AdminAuthorized)
-			// 添加用户
-			groupUser.POST("", user.Add)
-			// 删除用户
-			groupUser.DELETE("/:id", user.Delete)
-			// 修改用户
-			groupUser.PUT("", user.Modify)
-			// 获取用户列表
-			groupUser.GET("", user.List)
-			// 获取用户详细信息
-			groupUser.GET("/:id", user.Info)
+			groupUser.POST("/type", user.ListWithType)
+			{
+				groupUser.Use(middleware.AdminAuthorized)
+				// 添加用户
+				groupUser.POST("", user.Add)
+				// 删除用户
+				groupUser.DELETE("/:id", user.Delete)
+				// 修改用户
+				groupUser.PUT("", user.Modify)
+				// 获取用户详细信息
+				groupUser.GET("/:id", user.Info)
+				// 获取用户列表
+				groupUser.GET("", user.List)
+			}
 		}
 
 		groupDepartment := authorized.Group("/department")

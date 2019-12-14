@@ -58,11 +58,21 @@ func (u *User) Restore() error {
 	return err
 }
 
-func List(offset int, limit int) ([]User, int, error) {
+func List(offset int, limit int, types ...int8) ([]User, int, error) {
 	users := make([]User, 0)
-	count, err := pgdb.DB().Model(&users).
-		Where("type != ?", constant.TypeUserAdministrator).
-		Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
+	count := 0
+	var err error
+
+	if len(types) > 0 {
+		str := `select * from network_homework.tb_user 
+				where department  IN (select id from network_homework.tb_department
+    			where tb_department.type in ?);`
+		_, err = pgdb.DB().Query(&users, str, pg.InMulti(types))
+	} else {
+		query := pgdb.DB().Model(&users)
+		count, err = query.Where("type != ?", constant.TypeUserAdministrator).
+			Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
+	}
 
 	return users, count, err
 }
