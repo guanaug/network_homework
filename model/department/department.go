@@ -48,10 +48,15 @@ func (d *Department) Update() error {
 	return err
 }
 
-func List(offset int, limit int) ([]Department, int, error) {
+func List(offset int, limit int, t int8) ([]Department, int, error) {
 	departs := make([]Department, 0)
 
-	count, err := pgdb.DB().Model(&departs).Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
+	query := pgdb.DB().Model(&departs)
+	if t > 0 {
+		query.Where("department.type = ?", t)
+	}
+
+	count, err := query.Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
 
 	return departs, count, err
 }

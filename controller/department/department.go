@@ -128,8 +128,9 @@ func Modify(c *gin.Context) {
 
 func List(c *gin.Context) {
 	page := struct {
-		Page  int `form:"page" binding:"required,gt=0"`
-		Limit int `form:"limit" binding:"required,max=200"`
+		Type  int8 `form:"type"`
+		Page  int  `form:"page" binding:"required,gt=0"`
+		Limit int  `form:"limit" binding:"required,max=200"`
 	}{}
 
 	if err := c.BindQuery(&page); err != nil {
@@ -138,7 +139,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	departs, count, err := department.List((page.Page-1)*page.Limit, page.Limit)
+	departs, count, err := department.List((page.Page-1)*page.Limit, page.Limit, page.Type)
 	if err != nil {
 		logger.Logger().Warn("query departments error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

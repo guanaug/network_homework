@@ -31,6 +31,8 @@ func routerRegister(router *gin.Engine) {
 
 		groupDepartment := authorized.Group("/department")
 		{
+			// 获取部门列表
+			groupDepartment.GET("", department.List)
 			{
 				groupDepartment.Use(middleware.AdminAuthorized)
 				// 添加部门
@@ -39,8 +41,6 @@ func routerRegister(router *gin.Engine) {
 				groupDepartment.PUT("", department.Modify)
 				// 删除部门
 				groupDepartment.DELETE("/:id", department.Delete)
-				// 获取部门列表
-				groupDepartment.GET("", department.List)
 				// 获取部门详细信息
 				groupDepartment.GET("/:id", department.Info)
 			}

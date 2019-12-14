@@ -3,6 +3,7 @@ module network
 go 1.13
 
 require (
+	fyne.io/fyne v1.1.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-pg/pg v8.0.6+incompatible
