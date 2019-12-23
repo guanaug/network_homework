@@ -189,7 +189,7 @@
              
 ***
 
-* 会话相关
+* 会话相关1
     > POST `/session`
     * 作用：用户登录
     * 参数：
@@ -201,7 +201,7 @@
             * `application/json`
             * id: int64(required)，用户ID，规则同`POST /user`
             * name: string(required)，用户名称
-            * type: int8(required)，用户类型 1:管理员，-1:其他
+            * type: int8(required)，用户类型 1:管理员，2:市级单位 3:市级各辖区单位 4:受监管企业单位 5:签约技术支持/安全服务单位
         * 错误：
             * 400: 请输入正确的账号或密码
                 * `application/json`

@@ -6,6 +6,7 @@ import (
 	"network/global/constant"
 	"network/global/logger"
 	"network/global/session"
+	"network/model/department"
 	"network/model/loginlog"
 	"network/model/user"
 	"network/util/password"
@@ -49,6 +50,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	depart := department.Department{ID:u.Department, Type:u.Type}
+	if u.Type != constant.TypeUserAdministrator {
+		depart, err = depart.Info()
+		if err != nil {
+			logger.Logger().Warn("query department error:", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+	}
+
 	if err := session.Login(c, loginInfo.Account); err != nil {
 		logger.Logger().Warn("add session error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -59,7 +70,7 @@ func Login(c *gin.Context) {
 		ID   int64  `json:"id"`
 		Name string `json:"name"`
 		Type int8   `json:"type,omitempty"`
-	}{ID: u.ID, Name: u.Name, Type: u.Type}
+	}{ID: u.ID, Name: u.Name, Type: depart.Type}
 
 	// 记录用户ID，方便日志拦截器使用
 	c.Set(constant.KeyUserID, u.ID)

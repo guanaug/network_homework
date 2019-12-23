@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg"
 	"net/http"
 	"network/global/constant"
 	"network/global/logger"
@@ -202,15 +203,17 @@ func List(c *gin.Context) {
 }
 
 func Statistic(c *gin.Context) {
-	var stat []struct {
-		Status int8 `sql:"status" json:"status"`
-		Count  int  `json:"count"`
+	var stat struct {
+		Statistic []struct{
+			Status int8 `sql:"status" json:"status"`
+			Count  int  `json:"count"`
+		} `json:"statistic"`
 	}
 
 	err := transaciton.New().Model().Column("transaction.status").
 		ColumnExpr("count(*)").
 		Group("transaction.status").Select(&stat)
-	if err != nil {
+	if err != nil && err != pg.ErrNoRows {
 		logger.Logger().Warn("statistic transaction error:", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
