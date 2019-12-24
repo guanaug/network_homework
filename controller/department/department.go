@@ -207,3 +207,39 @@ func Info(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &departInfo)
 }
+
+func ListWithType(c *gin.Context) {
+	page := struct {
+		Type []int8 `json:"type"`
+	}{}
+
+	if err := c.BindJSON(&page); err != nil {
+		logger.Logger().Debug(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "用户类型有误！"})
+		return
+	}
+
+	departs, _, err := department.List(0, 0, page.Type...)
+	if err != nil {
+		logger.Logger().Warn("query department error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	type ds struct {
+		ID   int64  `json:"id"`
+		Type int8	`json:"type"`
+		Name string `json:"name"`
+	}
+	dbs := make([]ds, 0)
+
+	for _, d := range departs {
+		dbs = append(dbs, ds{
+			ID:   d.ID,
+			Type: d.Type,
+			Name: d.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, &dbs)
+}

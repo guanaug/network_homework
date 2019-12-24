@@ -36,6 +36,7 @@ func routerRegister(router *gin.Engine) {
 		{
 			// 获取部门列表
 			groupDepartment.GET("", department.List)
+			groupDepartment.POST("/type", department.ListWithType)
 			{
 				groupDepartment.Use(middleware.AdminAuthorized)
 				// 添加部门

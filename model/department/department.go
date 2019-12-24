@@ -48,12 +48,12 @@ func (d *Department) Update() error {
 	return err
 }
 
-func List(offset int, limit int, t int8) ([]Department, int, error) {
+func List(offset int, limit int, t ...int8) ([]Department, int, error) {
 	departs := make([]Department, 0)
 
 	query := pgdb.DB().Model(&departs)
-	if t > 0 {
-		query.Where("department.type = ?", t)
+	if len(t) > 0 {
+		query.Where("department.type IN (?)", pg.In(t))
 	}
 
 	count, err := query.Offset(offset).Limit(limit).Order("id asc").SelectAndCount()
