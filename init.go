@@ -52,14 +52,14 @@ func routerRegister(router *gin.Engine) {
 
 		groupTransaction := authorized.Group("/transaction")
 		{
+			// 获取事件信息
+			groupTransaction.GET("", transaction.List)
+			// 修改事件
+			groupTransaction.PUT("", transaction.Modified)
 			{
 				groupTransaction.Use(middleware.CityAndDistrictAuthorized)
 				// 添加事件
 				groupTransaction.POST("", transaction.Add)
-				// 修改事件
-				groupTransaction.PUT("", transaction.Modified)
-				// 获取事件信息
-				groupTransaction.GET("", transaction.List)
 				// 事件统计
 				groupTransaction.GET("/statistic", transaction.Statistic)
 			}
