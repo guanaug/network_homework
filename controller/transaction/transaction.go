@@ -79,7 +79,19 @@ func Modified(c *gin.Context) {
 	}
 	// 修改事件状态
 	if trans.Status > 0 {
+		role, err := user.GetRoleByAccount(session.GetUser(c))
+		if err != nil {
+			logger.Logger().Warn("get user role error:", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
 		model.Status = trans.Status
+		// 如果是 受监管企业或者技术支持单位 修改为完成状态，则进入待确认状态，必须等市级单位确认方算完成
+		if (constant.TypeUserSupport == role || constant.TypeUserSupervised == role) &&
+			constant.StatusEventFinished == trans.Status {
+			model.Status = constant.StatusEventUnconfirmed
+		}
 	}
 	// 指定单位处理事件
 	if trans.Handler > 0 {
@@ -115,6 +127,14 @@ func List(c *gin.Context) {
 		return
 	}
 
+	account := session.GetUser(c)
+	u, err := user.OneByAccount(account)
+	if err != nil {
+		logger.Logger().Warn("query user error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	mapID2Depart, err := department.MapID2Department()
 	if err != nil {
 		logger.Logger().Warn("query department error:", err)
@@ -130,13 +150,39 @@ func List(c *gin.Context) {
 
 	models := make([]transaciton.Transaction, 0)
 	model := pgdb.DB().Model(&models)
+
+	role := mapID2Depart[u.Department].Type
+	if constant.TypeUserCity == role || constant.TypeUserDistrict  == role {
+		us, err := u.SimDepUser()
+		if err != nil {
+			logger.Logger().Warn("query similar department users error:", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		usID := make([]int64, 0)
+		for _, v := range us {
+			usID = append(usID, v.ID)
+		}
+
+		// 市级单位查询该单位发布的事件
+		model.Where("publisher IN (?)", pg.In(usID))
+ 		if constant.TypeUserDistrict == role{
+			// 辖区单位查询处理辖区是该单位的事件或者该单位发布的事件
+			model.WhereOr("handler_department = (?)", u.Department)
+		}
+	} else if constant.TypeUserSupervised == role || constant.TypeUserSupport == role {
+		// 受监管/第三方技术公司查询处理单位是该单位的事件
+		model.Where("handler = ?", u.Department)
+	}
+
 	// 根据发布者进行查询
 	if trans.Publisher > 0 {
 		model.Where("publisher = ?", trans.Publisher)
 	}
 	// 根据事件类型进行查询
 	if trans.Type > 0 {
-		model.Where("publisher = ?", trans.Type)
+		model.Where("type = ?", trans.Type)
 	}
 	// 根据事件状态进行查询
 	if trans.Status > 0 {
@@ -194,7 +240,7 @@ func List(c *gin.Context) {
 			Detail:            tran.Detail,
 			TranType:          tran.TranType,
 			HandlerDepartment: mapID2Depart[tran.HandlerDepartment].Name,
-			Handler:           mapID2User[tran.Handler].Name,
+			Handler:           mapID2Depart[tran.Handler].Name,
 			ModifiedAt:        tran.ModifiedAt,
 		})
 	}

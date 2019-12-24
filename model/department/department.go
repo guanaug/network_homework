@@ -52,7 +52,7 @@ func List(offset int, limit int, t ...int8) ([]Department, int, error) {
 	departs := make([]Department, 0)
 
 	query := pgdb.DB().Model(&departs)
-	if len(t) > 0 {
+	if len(t) > 0 && t[0] > 0 {
 		query.Where("department.type IN (?)", pg.In(t))
 	}
 

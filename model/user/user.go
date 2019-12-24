@@ -132,3 +132,17 @@ func OneWithDeletedByAccount(account string) (User, error) {
 	_, err := pgdb.DB().QueryOne(&u, "SELECT * FROM network_homework.tb_user where account = ?", account)
 	return u, err
 }
+
+func (u *User) SimDepUser() ([]User, error) {
+	us := make([]User, 0)
+	err := u.Model().Where("department = ?", u.Department).Select(&us)
+	return us, err
+}
+
+func GetRoleByAccount(account string) (int8, error) {
+	var role int8
+	_, err := pgdb.DB().QueryOne(&role, "SELECT type FROM network_homework.tb_department where id = " +
+		"(SELECT department FROM network_homework.tb_user where account = ?)", account)
+
+	return role, err
+}
