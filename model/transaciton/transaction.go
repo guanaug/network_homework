@@ -18,6 +18,7 @@ type Transaction struct {
 	HandlerDepartment int64     `pg:"handler_department"`
 	Handler           int64     `pg:"handler"`
 	ModifiedAt        time.Time `pg:"modified_at"`
+	Comment			  string	`pg:"comment"`
 }
 
 func New() *Transaction {

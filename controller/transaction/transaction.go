@@ -25,6 +25,7 @@ type Transaction struct {
 	HandlerDepartment int64     `json:"handler_department,omitempty"`
 	Handler           int64     `json:"handler,omitempty"`
 	ModifiedAt        time.Time `json:"modified_at,omitempty"`
+	Comment           string    `json:"comment,omitempty"`
 }
 
 func Add(c *gin.Context) {
@@ -63,9 +64,10 @@ func Add(c *gin.Context) {
 
 func Modified(c *gin.Context) {
 	trans := struct {
-		ID      int64 `json:"id,omitempty" binding:"required"`
-		Status  int8  `json:"status,omitempty"`
-		Handler int64 `json:"handler,omitempty"`
+		ID      int64  `json:"id,omitempty" binding:"required"`
+		Status  int8   `json:"status,omitempty"`
+		Handler int64  `json:"handler,omitempty"`
+		Comment string `json:"comment,omitempty"`
 	}{}
 
 	if err := c.BindJSON(&trans); err != nil {
@@ -97,6 +99,9 @@ func Modified(c *gin.Context) {
 	if trans.Handler > 0 {
 		model.Handler = trans.Handler
 	}
+	if len(trans.Comment) > 0 {
+		model.Comment = trans.Comment
+	}
 
 	if err := model.Update(); err != nil {
 		logger.Logger().Warn("update transaction error:", err)
@@ -110,8 +115,8 @@ func Modified(c *gin.Context) {
 func List(c *gin.Context) {
 	trans := struct {
 		Publisher         int64     `form:"publisher,omitempty"`
-		Begin             time.Time `form:"Begin,omitempty"`
-		End               time.Time `form:"end,omitempty"`
+		Begin             time.Time `form:"begin,omitempty" time_format:"2006-01-02"`
+		End               time.Time `form:"end,omitempty" time_format:"2006-01-02"`
 		Type              int8      `form:"type,omitempty"`
 		Status            int8      `form:"status,omitempty"`
 		TranType          int8      `form:"tran_type,omitempty"`
@@ -152,7 +157,7 @@ func List(c *gin.Context) {
 	model := pgdb.DB().Model(&models)
 
 	role := mapID2Depart[u.Department].Type
-	if constant.TypeUserCity == role || constant.TypeUserDistrict  == role {
+	if constant.TypeUserCity == role || constant.TypeUserDistrict == role {
 		us, err := u.SimDepUser()
 		if err != nil {
 			logger.Logger().Warn("query similar department users error:", err)
@@ -167,7 +172,7 @@ func List(c *gin.Context) {
 
 		// 市级单位查询该单位发布的事件
 		model.Where("publisher IN (?)", pg.In(usID))
- 		if constant.TypeUserDistrict == role{
+		if constant.TypeUserDistrict == role {
 			// 辖区单位查询处理辖区是该单位的事件或者该单位发布的事件
 			model.WhereOr("handler_department = (?)", u.Department)
 		}
@@ -212,16 +217,16 @@ func List(c *gin.Context) {
 	}
 
 	type response struct {
-		ID                int64     `json:"id,omitempty"`
-		Publisher         string    `json:"publisher,omitempty"`
-		CreatedAt         time.Time `json:"created_at,omitempty"`
-		Type              int8      `json:"type,omitempty"`
-		Status            int8      `json:"status,omitempty"`
-		Detail            string    `json:"detail,omitempty"`
-		TranType          int8      `json:"tran_type,omitempty"`
-		HandlerDepartment string    `json:"handler_department,omitempty"`
-		Handler           string    `json:"handler,omitempty"`
-		ModifiedAt        time.Time `json:"modified_at,omitempty"`
+		ID                int64  `json:"id,omitempty"`
+		Publisher         string `json:"publisher,omitempty"`
+		CreatedAt         string `json:"created_at,omitempty"`
+		Type              int8   `json:"type,omitempty"`
+		Status            int8   `json:"status,omitempty"`
+		Detail            string `json:"detail,omitempty"`
+		TranType          int8   `json:"tran_type,omitempty"`
+		HandlerDepartment string `json:"handler_department,omitempty"`
+		Handler           string `json:"handler,omitempty"`
+		ModifiedAt        string `json:"modified_at,omitempty"`
 	}
 
 	transactions := struct {
@@ -234,14 +239,14 @@ func List(c *gin.Context) {
 		transactions.Transactions = append(transactions.Transactions, response{
 			ID:                tran.ID,
 			Publisher:         mapID2User[tran.Publisher].Name,
-			CreatedAt:         tran.CreatedAt,
+			CreatedAt:         tran.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
 			Type:              tran.Type,
 			Status:            tran.Status,
 			Detail:            tran.Detail,
 			TranType:          tran.TranType,
 			HandlerDepartment: mapID2Depart[tran.HandlerDepartment].Name,
 			Handler:           mapID2Depart[tran.Handler].Name,
-			ModifiedAt:        tran.ModifiedAt,
+			ModifiedAt:        tran.ModifiedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
 		})
 	}
 

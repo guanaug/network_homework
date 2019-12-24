@@ -42,13 +42,16 @@ const (
 	TypeEventMax
 )
 
-// 事件处理状态: 1:待办事项、2:处理中事项、3:已完成事项 4:待确认事件
+// 事件处理状态: 1:待办事项、2:处理中事项、3:已完成事项 4:待确认事件 5:继续整改 6:予以处罚 7:予以关停
 const (
 	StatusPlaceholder = iota
 	StatusEventTodo
 	StatusEventDealing
 	StatusEventFinished
 	StatusEventUnconfirmed
+	StatusEventContinue
+	StatusEventPunish
+	StatusEventClose
 )
 
 // 事务类型：1:安全事件通报、2:热点事件发布
