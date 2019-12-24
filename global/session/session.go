@@ -50,7 +50,7 @@ func Login(c *gin.Context, value string) error {
 func Logout(c *gin.Context) error {
 	delete(Session(c).Values, loginName)
 	Session(c).Options = &sessions.Options{
-		MaxAge:   -1,
+		MaxAge: -1,
 	}
 	return Session(c).Save(c.Request, c.Writer)
 }

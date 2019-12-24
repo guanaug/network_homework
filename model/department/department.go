@@ -90,7 +90,7 @@ func MapID2Department(id ...int64) (map[int64]Department, error) {
 	return mapID2Department, nil
 }
 
-func (d *Department) IsRoleOr(role ...int8) (bool, error)  {
+func (d *Department) IsRoleOr(role ...int8) (bool, error) {
 	if len(role) == 0 {
 		return false, nil
 	}

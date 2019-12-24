@@ -13,6 +13,7 @@ func init() {
 
 	once.Do(func() {
 		db = pg.Connect(&pg.Options{
+			Addr:     "net.dogod.top:5432",
 			User:     "postgres",
 			Password: "root",
 			Database: "dogod",

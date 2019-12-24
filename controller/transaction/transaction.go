@@ -203,12 +203,11 @@ func List(c *gin.Context) {
 }
 
 func Statistic(c *gin.Context) {
-	var stat struct {
-		Statistic []struct{
-			Status int8 `sql:"status" json:"status"`
-			Count  int  `json:"count"`
-		} `json:"statistic"`
+	type Stat []struct {
+		Status int8 `sql:"status" json:"status"`
+		Count  int  `json:"count"`
 	}
+	stat := Stat{}
 
 	err := transaciton.New().Model().Column("transaction.status").
 		ColumnExpr("count(*)").
@@ -219,5 +218,10 @@ func Statistic(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &stat)
+	var result struct {
+		Statistic Stat `json:"statistic"`
+	}
+	result.Statistic = stat
+
+	c.JSON(http.StatusOK, &result)
 }

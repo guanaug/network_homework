@@ -50,7 +50,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	depart := department.Department{ID:u.Department, Type:u.Type}
+	depart := department.Department{ID: u.Department, Type: u.Type}
 	if u.Type != constant.TypeUserAdministrator {
 		depart, err = depart.Info()
 		if err != nil {
