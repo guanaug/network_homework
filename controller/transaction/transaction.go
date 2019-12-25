@@ -297,7 +297,7 @@ func StatisticArray(c *gin.Context) {
 
 	result := make([]int, constant.StatusEventMax-1)
 	for _, v := range stat {
-		result[v.Status] = v.Count
+		result[v.Status-1] = v.Count
 	}
 
 	c.JSON(http.StatusOK, &result)
