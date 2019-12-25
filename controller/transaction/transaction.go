@@ -227,6 +227,7 @@ func List(c *gin.Context) {
 		HandlerDepartment string `json:"handler_department,omitempty"`
 		Handler           string `json:"handler,omitempty"`
 		ModifiedAt        string `json:"modified_at,omitempty"`
+		Comment			  string `json:"comment,omitempty"`
 	}
 
 	transactions := struct {
@@ -247,6 +248,7 @@ func List(c *gin.Context) {
 			HandlerDepartment: mapID2Depart[tran.HandlerDepartment].Name,
 			Handler:           mapID2Depart[tran.Handler].Name,
 			ModifiedAt:        tran.ModifiedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			Comment:		   tran.Comment,
 		})
 	}
 
