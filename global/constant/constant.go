@@ -52,6 +52,7 @@ const (
 	StatusEventContinue
 	StatusEventPunish
 	StatusEventClose
+	StatusEventMax
 )
 
 // 事务类型：1:安全事件通报、2:热点事件发布

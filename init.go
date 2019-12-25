@@ -62,6 +62,7 @@ func routerRegister(router *gin.Engine) {
 				groupTransaction.POST("", transaction.Add)
 				// 事件统计
 				groupTransaction.GET("/statistic", transaction.Statistic)
+				groupTransaction.GET("/statistic/array", transaction.StatisticArray)
 			}
 		}
 

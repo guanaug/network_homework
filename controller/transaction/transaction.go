@@ -278,3 +278,27 @@ func Statistic(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &result)
 }
+
+func StatisticArray(c *gin.Context) {
+	type Stat []struct {
+		Status int8 `sql:"status" json:"status"`
+		Count  int  `json:"count"`
+	}
+	stat := Stat{}
+
+	err := transaciton.New().Model().Column("transaction.status").
+		ColumnExpr("count(*)").
+		Group("transaction.status").Select(&stat)
+	if err != nil && err != pg.ErrNoRows {
+		logger.Logger().Warn("statistic transaction error:", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	result := make([]int, constant.StatusEventMax-1)
+	for _, v := range stat {
+		result[v.Status] = v.Count
+	}
+
+	c.JSON(http.StatusOK, &result)
+}
