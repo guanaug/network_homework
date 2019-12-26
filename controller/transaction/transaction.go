@@ -49,7 +49,7 @@ func Add(c *gin.Context) {
 		Type:              trans.Type,
 		Status:            constant.StatusEventTodo,
 		Detail:            trans.Detail,
-		TranType:          trans.Type,
+		TranType:          trans.TranType,
 		HandlerDepartment: trans.HandlerDepartment,
 	}
 
