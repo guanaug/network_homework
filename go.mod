@@ -3,7 +3,7 @@ module network
 go 1.13
 
 require (
-	github.com/gin-gonic/gin v1.7.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/gorilla/sessions v1.2.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
